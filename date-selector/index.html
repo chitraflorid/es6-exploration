@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>Test</title>
+        <link rel="stylesheet" type="text/css" href="screen.css">
+        <script src="main.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+
+        <form>
+            <ul id="date-tabs">
+                <li class="days-of-the-week">Days of the Week</li>
+                <li class="date-picker">Date Picker</li>
+                <li class="user-input">User Input</li>
+            </ul>
+            <div id="user-input-block">
+                <div id="days-of-the-week">
+                <input type="checkbox" value="MON"> Monday
+                <input type="checkbox" value="TUE"> Tuesday
+                <input type="checkbox" value="WED"> Wednesday
+                <input type="checkbox" value="THU"> Thursday
+                <input type="checkbox" value="FRI"> Friday
+                <input type="checkbox" value="SAT"> Saturday
+                <input type="checkbox" value="SUN"> Sunday
+            </div>
+            or
+            <div id="date-picker" class="hide">
+                <input type="hidden" value="" id="date">
+                <select id="day">
+                    <option selected disabled>Select Day</option>
+                </select>
+                <select id="month">
+                    <option selected disabled>Select Month</option>
+
+                </select>
+                <select id="year">
+                    <option selected disabled>Select Year</option>
+                </select>
+            </div>
+            or
+            <div id="user-input" class="hide">
+                <!-- parse it to fields above -->
+                <input type="text" value="" id="input">
+            </div>
+            </div>
+
+            <input type="submit" value="Run" id="submit">
+
+            <!-- final format: MON,TUE,FRI or 05/12/2011 -->
+            <input type="text" value="" id="result" placeholder="Result">
+        </form>
+    </body>
+</html>
