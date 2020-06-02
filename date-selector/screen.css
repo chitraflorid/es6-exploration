@@ -1,0 +1,23 @@
+#form {
+    display: grid;
+    grid-template-columns: 30% 30% 30%;
+}
+
+.hide {
+    display: none;
+}
+
+
+
+.date-tabs {
+    display: flex;
+
+}
+
+#date-tabs li {
+    padding: 5px;
+    list-style: none;
+    display: inline-list-item;
+    border: 1px solid grey;
+    margin: 2px;
+}
