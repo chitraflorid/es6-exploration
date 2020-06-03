@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('#date-tabs').addEventListener(
         'click',
-        datePicker.setActiveTab.bind(datePicker)
+         datePicker.setActiveTab.bind(datePicker)
     );
 
     document.querySelector('#submit').addEventListener(
@@ -202,3 +202,4 @@ document.addEventListener('DOMContentLoaded', () => {
         datePicker.handleSubmitClick.bind(datePicker)
     );
 });
+
