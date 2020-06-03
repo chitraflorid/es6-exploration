@@ -11,6 +11,10 @@ class DateSelector {
         DateSelector.loadDatePickerValues();
     }
 
+    /**
+     * Sets Active tab based on the user click
+     * @param e {Event | HTMLElement} - Click event / Element
+     */
     setActiveTab(e) {
         const el = e.target || e;
 
@@ -26,6 +30,10 @@ class DateSelector {
         })
     }
 
+    /**
+     * Handles the submit button click
+     * @param e {Event} - Click event
+     */
     handleSubmitClick(e) {
         e.preventDefault();
         let result;
@@ -48,6 +56,10 @@ class DateSelector {
         this._setActiveTabAndSelectedValues();
     }
 
+    /**
+     * Sets the relevant active tab and value(s) based on given user input
+     * @private
+     */
     _setActiveTabAndSelectedValues() {
         const result = document.querySelector('#result').value;
 
@@ -61,6 +73,11 @@ class DateSelector {
         }
     }
 
+    /**
+     * Makes the relevant checkboxe(s) to be selected based on the given user input
+     * @param result {string} - Result string
+     * @private
+     */
     _makeCheckBoxSelected(result) {
         const checks = document.querySelectorAll('input[type="checkbox"]');
 
@@ -71,6 +88,11 @@ class DateSelector {
         });
     }
 
+    /**
+     * Makes the relevant option values to be selected in the date picker based on the user input
+     * @param result {string} - Result string
+     * @private
+     */
     _makeDropdownsSelected(result) {
         let selectName;
 
@@ -89,6 +111,11 @@ class DateSelector {
         });
     }
 
+    /**
+     * Gets the date picker value
+     * @return {string} - date picker value
+     * @private
+     */
     _getDatePickerValue() {
         const daySelect = document.querySelector('#day');
         const monthSelect = document.querySelector('#month');
@@ -99,11 +126,21 @@ class DateSelector {
         return `${day}/${month}/${yearSelect.value}`;
     }
 
+    /**
+     * Gets user provided input
+     * @return {string}
+     * @private
+     */
     _getUserInput() {
         const userInput = document.querySelector('#input');
         return userInput.value;
     }
 
+    /**
+     * Gets the selected week of days as comma separated string
+     * @return {string}
+     * @private
+     */
     _getWeekOfDays() {
         const checks = document.querySelectorAll('input[type="checkbox"]');
         console.log("checks::");
@@ -118,6 +155,10 @@ class DateSelector {
         return checkedDays.join(', ');
     }
 
+    /**
+     * Loads the date picker dropdown options
+     * @static
+     */
     static loadDatePickerValues() {
         const daySelect = document.querySelector('#day');
         const monthSelect = document.querySelector('#month');
