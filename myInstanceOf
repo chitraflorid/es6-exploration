@@ -1,0 +1,14 @@
+function myInstanceOf(object, target) {  
+  if(object.toString() !== "[object Object]") return false;
+  
+  while (object !== null) {
+    const protoObj = Object.getPrototypeOf(src);
+    
+    if (protoObj === target.prototype) return true;
+    
+    object = protoObj;
+  
+  }
+  
+  return false;
+}
