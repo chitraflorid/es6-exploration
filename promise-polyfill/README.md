@@ -1,187 +1,44 @@
-const STATE = {
-    PENDING: 'pending',
-    FULLFILLED: 'fullfilled',
-    REJECTED: 'rejected'
-};
+const prom = new MyPromise((resolve, reject) => { try {
 
-class MyPromise {
-    _state = STATE.PENDING;
-    _value = null;
-    _reason = null;
-    _thenQ = [];
+  // do some async operation
 
-    constructor(executor) {
-        try {
-            executor(this._resolver.bind(this), this._rejector.bind(this));
-        } catch(err) {
-            
-        }
-    }
+  resolve(result);
+  
+  } catch(err) {
+    reject(err);
+  }
+});
 
-    static isThenable(obj) {
-        const type = typeof obj;
-        return type !== null && type === "object" && obj.hasOwnProperty("then");
-    }
+Promise represents an eventual result of an asynchronous operation. It can be in the following states such as pending, fullfilled and rejected.
 
-    _resolver(result) {
-        this._value = result;
-        this._state = STATE.FULLFILLED;
-        this._runOnFullfillSubscribers();
-    }
+The constructor accepts a function as it's argument. This is the executor function which would accept 2 aguments such as resolve and reject. Executor's responsibility is to call either resolve or reject based on the outcome of the associated asynchornous operation defined in it. Both the resolve and reject would be passed by the Promise to this Executor function.
 
-    _rejector(reason) {
-        this._reason = reason;
-        this._state = STATE.REJECTED;
-        
-        this._runOnRejectSubscribers();
-    }
+then method:
 
-    _runOnFullfillSubscribers() {
-        if (this._state === STATE.PENDING) return;
-        
-        this._thenQ.forEach(([chainablePromise, onFullfillHandler]) => {
-            if (typeof onFullfillHandler === "function") {
-                const result = onFullfillHandler(this._value);
-                
-                if (MyPromise.isThenable(result)) {
-                    result.then(val => chainablePromise._resolver(val), reason => chainablePromise._rejector(reason));
-                } else {
-                    chainablePromise._resolver(result);
-                }
-            } else {
-                chainablePromise._resolver(this._value);
-            }
-            
-        });
-        
-        this._thenQ = [];
-    }
+As per Promises/A+ specification, then method should always return a new promise instance.
 
-    _runOnRejectSubscribers() {
-        if (this._state === STATE.PENDING) return;
-         
-        this._thenQ.forEach(([chainablePromise, _, onRejectHandler]) => {
-            if (typeof onRejectHandler !== "function") {
-                const result = onRejectHandler(this._reason);
-                if (MyPromise.isThenable(result)) {
-                    result.then(val => chainablePromise._resolver(val), reason => chainablePromise._rejector(reason));
-                } else {
-                    chainablePromise._resolver(result);
-                }
-            } else {
-                chainablePromise._rejector(this._reason);
-            }
-        });
-        
-        this._thenQ = [];
-    }
+It will accept 2 arguments namely onFullfillHandler and onRejectHandle.
 
-    then(onFullfillHandler, onRejectHandler) {
-        const chaninablePromise = new MyPromise();
-        
-        this._thenQ.push([chaninablePromise, onFullfillHandler, onRejectHandler]);
+Multiple then's can be attached to the same promise.
 
-        if (this._state !== STATE.PENDING) {
-            this._value && this._runOnFullfillSubscribers();
-            
-            this._reason && this._runOnRejectSubscribers();
-            
-            this._thenQ = [];
-        }
-                
-        return chaninablePromise;
-    }
+The callback handlers should not be called before promise is settled.
 
-    catch(onRejectHandler) {
-        return this.then(null, onRejectHandler);
-    }
+Once it's settled, it's state / value can't be transformed.
 
-    static all(promiseArr) {
-        const result = [ ];
-        let i = 0;
-        if (!Array.isArray(promiseArr)) {
-            throw new Error("Input should be an Array!");
-        }
-        
-        return new MyPromise((resolve, reject) => {
-        		promiseArr.forEach((promise, indx) => {
-              	promise.then(res => {
-                    result[indx] = res;
+The callbacks provided by then methods would be stored and invoked in their originating order once the associated promise is settled.
 
-                    if (i === promiseArr.length - 1) {
-                    		return resolve(result);
-                    }
-                    i++;
-                })
-                .catch(err => {
-                    return reject(err);
-                });
-        });
-      });
-    }
+Promise resolution behavior:
 
-    static race(promiseArr) {
-        let result;
-        
-        if (!Array.isArray(promiseArr)) {
-            throw new Error("Input should be an Array!");
-        }
-        
-        return new MyPromise((resolve, reject) => {
-           promiseArr.forEach(promise => {
-              promise.then(res => resolve(res)).catch(err => reject(err)); 
-           });
-        });        
-    }    
+if Promise is fullfilled, then the associated onFullfillHandlers would be invoked one by one by passing the value of the promise.
 
-    static allSettled(promiseArr) {
-        const result = [];
-        let i = 0;
-        if (!Array.isArray(promiseArr)) {
-            throw new Error("Input should be an Array!");
-        }
-        
-         return new MyPromise((resolve, reject) => {
-            promiseArr.forEach(async (promise, index) => {
-                await promise.then(res => {
-                    result[index] = res;
-                    
-                    if (i === promiseArr.length - 1) {
-                        resolve(result);
-                    }
-                })
-                .catch(err => {
-                    result[index] = err;
-                    if (i === promiseArr.length - 1) {
-                        resolve(result);
-                    }
-                });
-                i++;
-        });
-      });
-    }
-       
-    static any(promiseArr) {
-       	let result;
-        let i = 0;
-       	 		
-        if (!Array.isArray(promiseArr)) {
-            throw new Error("Input should be an Array!");
-        }
-            
-        return new MyPromise((resolve, reject) => {
-            promiseArr.forEach((promise, index) => {
-                promise
-                    .then(res => {
-                    resolve(res);
-                })
-                .catch(err => {
-                    if (i === promiseArr.length - 1) {
-                        reject(new AggregateError([new Error("Rejected Promises")], "All Promises were rejected!"));
-                    }                   
-                    i++;
-                 });
-            });
-        });
-    }
-}
+If the onFullfillHandler is provided , it would be called with the promise's value.
+
+If the returned value by onFullfillHandler is thenable
+
+( a promise-like Object with then method defined in it ), 
+the chainable promise (returned by the then method in which currently executing onFullfillHandler was passed) would be settled with the                      value / reason of this thenable promise.
+If not thenable, then the chainable promise would be resolved with itself.
+
+If there is no onFullfillHandler provided, then the associated chainable promsie woudld be resolved with the promise's value itself.
+
+The similar procedure would be applicable for onRejectHandler with the promise's reason.
