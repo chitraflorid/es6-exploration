@@ -113,7 +113,7 @@ class MyPromise {
                    if (i === promiseArr.length-1) {
                         resolve(result);   
                    }
-               }
+               })
                .catch(err => reject(err));
            } 
             
