@@ -26,13 +26,12 @@ class MyPromise {
     _resolver(result) {
         this._value = result;
         this._state = STATE.FULLFILLED;
-        
         this._runOnFullfillSubscribers();
     }
 
     _rejector(reason) {
         this._reason = reason;
-        this.state = STATE.REJECTED;
+        this._state = STATE.REJECTED;
         
         this._runOnRejectSubscribers();
     }
@@ -58,22 +57,20 @@ class MyPromise {
         this._thenQ = [];
     }
 
-    _runOnRejectubscribers() {
+    _runOnRejectSubscribers() {
         if (this._state === STATE.PENDING) return;
-        
+         
         this._thenQ.forEach(([chainablePromise, _, onRejectHandler]) => {
-            if (typeof onRejectHandler === "function") {
+            if (typeof onRejectHandler !== "function") {
                 const result = onRejectHandler(this._reason);
-                
                 if (MyPromise.isThenable(result)) {
                     result.then(val => chainablePromise._resolver(val), reason => chainablePromise._rejector(reason));
                 } else {
-                    chainablePromise._rejector(result);
+                    chainablePromise._resolver(result);
                 }
             } else {
-                chainablePromise._rejector(this._value);
+                chainablePromise._rejector(this._reason);
             }
-            
         });
         
         this._thenQ = [];
@@ -83,41 +80,44 @@ class MyPromise {
         const chaninablePromise = new MyPromise();
         
         this._thenQ.push([chaninablePromise, onFullfillHandler, onRejectHandler]);
-        
+
         if (this._state !== STATE.PENDING) {
             this._value && this._runOnFullfillSubscribers();
             
             this._reason && this._runOnRejectSubscribers();
+            
+            this._thenQ = [];
         }
+                
+        return chaninablePromise;
     }
 
     catch(onRejectHandler) {
-        this.then(null, onRejectHandler);
+        return this.then(null, onRejectHandler);
     }
 
     static all(promiseArr) {
-        const result = [];
-        let rejected;
+        const result = [ ];
+        let i = 0;
         if (!Array.isArray(promiseArr)) {
             throw new Error("Input should be an Array!");
         }
         
         return new MyPromise((resolve, reject) => {
-           for (let i = 0; i < promiseArr.length; i++) {
-               if (rejected !== undefined) {
-                   return reject(rejected);
-               }
-               
-               promiseArr[i].then(res => {
-                   result.push(res);
-                   if (i === promiseArr.length-1) {
-                        resolve(result);   
-                   }
-               })
-               .catch(err => reject(err));
-           } 
-            
+        		promiseArr.forEach((promise, indx) => {
+              	promise.then(res => {
+                    result[indx] = res;
+
+                    if (i === promiseArr.length - 1) {
+                    		return resolve(result);
+                    }
+                    i++;
+                })
+                .catch(err => {
+                    return reject(err);
+                });
         });
+      });
     }
 
     static race(promiseArr) {
@@ -128,7 +128,7 @@ class MyPromise {
         }
         
         return new MyPromise((resolve, reject) => {
-           MyPromise.forEach((promise, indx) => {
+           promiseArr.forEach(promise => {
               promise.then(res => resolve(res)).catch(err => reject(err)); 
            });
         });        
@@ -136,25 +136,52 @@ class MyPromise {
 
     static allSettled(promiseArr) {
         const result = [];
+        let i = 0;
         if (!Array.isArray(promiseArr)) {
             throw new Error("Input should be an Array!");
         }
         
+         return new MyPromise((resolve, reject) => {
+            promiseArr.forEach(async (promise, index) => {
+                await promise.then(res => {
+                    result[index] = res;
+                    
+                    if (i === promiseArr.length - 1) {
+                        resolve(result);
+                    }
+                })
+                .catch(err => {
+                    result[index] = err;
+                    if (i === promiseArr.length - 1) {
+                        resolve(result);
+                    }
+                });
+                i++;
+        });
+      });
+    }
+       
+    static any(promiseArr) {
+       	let result;
+        let i = 0;
+       	 		
+        if (!Array.isArray(promiseArr)) {
+            throw new Error("Input should be an Array!");
+        }
+            
         return new MyPromise((resolve, reject) => {
-           for (let i = 0; i < promiseArr.length; i++) {
-               promiseArr[i].then(res => {
-                   result.push(res);
-                   if (i === promiseArr.length - 1) {
-                     resolve(result); 
-                   }
-               }, 
-              reason => {
-                   result.push(reason);
-                   if (i === promiseArr.length - 1) {
-                     resolve(result); 
-                   }
-               });   
-           }
+            promiseArr.forEach((promise, index) => {
+                promise
+                    .then(res => {
+                    resolve(res);
+                })
+                .catch(err => {
+                    if (i === promiseArr.length - 1) {
+                        reject(new AggregateError([new Error("Rejected Promises")], "All Promises were rejected!"));
+                    }                   
+                    i++;
+                 });
+            });
         });
     }
-} // in-progress
+}
