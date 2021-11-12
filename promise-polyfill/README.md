@@ -14,6 +14,7 @@ Promise represents an eventual result of an asynchronous operation. It can be in
 The constructor accepts a function as it's argument. This is the executor function which would accept 2 aguments such as resolve and reject. Executor's responsibility is to call either resolve or reject based on the outcome of the associated asynchornous operation defined in it. Both the resolve and reject would be passed by the Promise to this Executor function.
 
 then method:
+============
 
 As per Promises/A+ specification, then method should always return a new promise instance.
 
@@ -28,6 +29,7 @@ Once it's settled, it's state / value can't be transformed.
 The callbacks provided by then methods would be stored and invoked in their originating order once the associated promise is settled.
 
 Promise resolution behavior:
+===========================
 
 if Promise is fullfilled, then the associated onFullfillHandlers would be invoked one by one by passing the value of the promise.
 
