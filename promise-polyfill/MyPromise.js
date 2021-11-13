@@ -124,7 +124,7 @@ class MyPromise {
         let result;
         
         if (!Array.isArray(promiseArr)) {
-            throw new Error("Input should be an Array!");
+            MyPromise.reject(new Error("Input should be an Array!"));
         }
         
         return new MyPromise((resolve, reject) => {
@@ -138,7 +138,7 @@ class MyPromise {
         const result = [];
         let i = 0;
         if (!Array.isArray(promiseArr)) {
-            throw new Error("Input should be an Array!");
+            MyPromise.reject(new Error("Input should be an Array!"));
         }
         
          return new MyPromise((resolve, reject) => {
@@ -166,7 +166,7 @@ class MyPromise {
         let i = 0;
        	 		
         if (!Array.isArray(promiseArr)) {
-            throw new Error("Input should be an Array!");
+            MyPromise.reject(new Error("Input should be an Array!"));
         }
             
         return new MyPromise((resolve, reject) => {
